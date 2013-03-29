@@ -204,6 +204,16 @@ describe('Boom', function () {
             expect(Boom.internal('my message', { my: 'data' }).data.my).to.equal('data');
             done();
         });
+
+        it('sets the payload to the error when the showError environmental variable is set', function (done) {
+
+            var current = process.env.showError;
+            process.env.showError = true;
+            var err = Boom.internal('my message', { my: 'data' });
+            expect(err.response.payload.data.my).to.equal('data');
+            process.env.showError = current;
+            done();
+        });
     });
 
     describe('#passThrough', function () {
@@ -219,6 +229,16 @@ describe('Boom', function () {
                 headers: { 'X-Test': 'Boom' },
                 type: 'application/text'
             });
+            done();
+        });
+    });
+
+    describe('#reformat', function () {
+
+        it('encodes any HTML markup in the response payload', function (done) {
+
+            var boom = new Boom(new Error('<script>alert(1)</script>'));
+            expect(boom.response.payload.message).to.not.contain('<script>');
             done();
         });
     });
